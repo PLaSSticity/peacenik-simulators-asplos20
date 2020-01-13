@@ -1,0 +1,26 @@
+
+# /
+/GPATH
+/GRTAGS
+/GTAGS
+/bin
+/dequeue
+/blackscholes
+/test1
+/canneal
+/swaptions
+/x264
+/ferret
+/streamcluster
+/vips
+/swaptions-output.txt
+/blackscholes-output.txt
+/blackscholes-stats.py
+/x264-output.txt
+/x264-stats.py
+/test1-output.txt
+/test1-stats.py
+/vips-output.txt
+/fluidanimate-output.txt
+/fluidanimate-stats.py
+/vips-stats.py

@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build" name="mesisim">
+  <property environment="env"/>
+  <property name="ECLIPSE_HOME" value="../../../../usr/lib/eclipse"/>
+  <property name="junit.output.dir" value="junit"/>
+  <property name="debuglevel" value="source,lines,vars"/>
+  <property name="target" value="1.7"/>
+  <property name="source" value="1.7"/>
+  <path id="mesisim.classpath">
+    <pathelement location="bin"/>
+    <pathelement location="lib/jopt-simple-3.2.jar"/>
+    <pathelement location="lib/junit-4.8.2.jar"/>
+    <pathelement location="lib/guava-r08.jar"/>
+  </path>
+
+  <target name="init">
+    <mkdir dir="bin"/>
+    <copy includeemptydirs="false" todir="bin">
+      <fileset dir="src">
+        <exclude name="**/*.launch"/>
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
+    <!-- <copy includeemptydirs="false" todir="bin">
+         <fileset dir="test">
+         <exclude name="**/*.launch"/>
+         <exclude name="**/*.java"/>
+         </fileset>
+         </copy> -->
+  </target>
+
+  <target name="clean">
+    <delete verbose="true" includeEmptyDirs="true" failonerror="false">
+      <!--Deletes all files and subdirectories of bin, including bin itself-->
+      <fileset dir="bin"/>
+      <!--Deletes all files and subdirectories of junit, including junit itself-->
+      <fileset dir="junit" includes="**/*"/>
+      <fileset dir="${basedir}" includes="**/.py*" />
+    </delete>
+
+    <!--<delete verbose="true" includeemptydirs="true">
+        <fileset dir="${basedir}" includes="**/bin/**" />
+        <fileset dir="${basedir}" includes="**/junit/**" />
+        <fileset dir="${basedir}" includes="**/.py*" />
+        </delete>-->
+
+    <!-- SB: Alternate ways
+         <delete dir="bin"/>
+         <delete dir="junit"/>-->
+  </target>
+
+  <target depends="init" name="build">
+    <echo message="${ant.project.name}: ${ant.file}"/>
+    <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="1.7" target="1.7" verbose="no">
+      <src path="src"/>
+      <classpath refid="mesisim.classpath"/>
+    </javac>
+
+    <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+      <src path="test"/>
+      <classpath refid="mesisim.classpath"/>
+    </javac>
+  </target>
+
+  <target name="junittests" depends="build">
+    <mkdir dir="${junit.output.dir}"/>
+    <junit fork="yes" printsummary="on" haltonerror="on" haltonfailure="on" showoutput="false">
+      <assertions>
+        <enable/>
+      </assertions>
+      <formatter type="xml" usefile="true"/>
+      <!-- type="plain/brief" -->
+      <test name="simulator.mesi.MESIUniProcessorTests" todir="${junit.output.dir}"/>
+      <test name="simulator.mesi.MESIMultiProcessorTests" todir="${junit.output.dir}"/>
+      <classpath refid="mesisim.classpath"/>
+    </junit>
+  </target>
+
+  <target depends="junittests" name="junitreport">
+    <junitreport todir="${junit.output.dir}">
+      <fileset dir="${junit.output.dir}">
+        <include name="TEST-*.xml"/>
+      </fileset>
+      <report format="frames" todir="${junit.output.dir}"/>
+    </junitreport>
+  </target>
+
+  <target name="test1" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="2g" output="test1-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/test1'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./test1-stats.py"'/>
+      <arg line='--cores 8'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts true'/>
+      <arg line='--assert-period 10000'/>
+    </java>
+  </target>
+
+  <target name="blackscholes" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="2g" output="blackscholes-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/blackscholes-simsmall'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./blackscholes-stats.py"'/>
+      <arg line='--cores 8'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts true'/>
+      <arg line='--assert-period 1000000'/>
+    </java>
+  </target>
+
+  <target name="bodytrack" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="2g" output="bodytrack-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/bodytrack-simsmall'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./bodytrack-stats.py"'/>
+      <arg line='--cores 8'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts true'/>
+      <arg line='--assert-period 10000'/>
+    </java>
+  </target>
+
+  <target name="canneal" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="2g" output="canneal-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/canneal-simsmall'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./canneal-stats.py"'/>
+      <arg line='--cores 8'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts true'/>
+      <arg line='--assert-period 10000'/>
+    </java>
+  </target>
+
+  <target name="dedup" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="2g" output="dedup-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/dedup-simsmall'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./dedup-stats.py"'/>
+      <arg line='--cores 8'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts true'/>
+      <arg line='--assert-period 10000'/>
+    </java>
+  </target>
+
+  <target name="facesim" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="2g" output="facesim-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/facesim-simsmall'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./facesim-stats.py"'/>
+      <arg line='--cores 8'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts true'/>
+      <arg line='--assert-period 10000'/>
+    </java>
+  </target>
+
+  <target name="ferret" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="2g" output="ferret-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/ferret-simsmall'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./ferret-stats.py"'/>
+      <arg line='--cores 8'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts true'/>
+      <arg line='--assert-period 10000'/>
+    </java>
+  </target>
+
+  <target name="fluidanimate" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="4g" output="fluidanimate-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/fluidanimate-simsmall'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./fluidanimate-stats.py"'/>
+      <arg line='--cores 8'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts false'/>
+      <arg line='--assert-period 10000'/>
+      <arg line='--conflict-exceptions true'/>
+    </java>
+  </target>
+
+  <target name="raytrace" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="2g" output="raytrace-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/raytrace-simsmall'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./raytrace-stats.py"'/>
+      <arg line='--cores 8'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts true'/>
+      <arg line='--assert-period 10000'/>
+    </java>
+  </target>
+
+  <target name="streamcluster" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="3g" output="streamcluster-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/streamcluster-simsmall'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./streamcluster-stats.py"'/>
+      <arg line='--cores 8'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts false'/>
+      <arg line='--assert-period 10000'/>
+      <arg line='--conflict-exceptions true'/>   
+    </java>
+  </target>
+
+  <target name="swaptions" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="2g" output="swaptions-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/swaptions-simsmall-n16'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./swaptions-stats.py"'/>
+      <arg line='--cores 16'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts false'/>
+      <arg line='--assert-period 10000'/>
+    </java>
+  </target>
+
+  <target name="vips" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="3g" output="vips-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/vips-simsmall'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./vips-stats.py"'/>
+      <arg line='--cores 8'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts true'/>
+      <arg line='--assert-period 1000000'/>
+      <arg line='--conflict-exceptions false'/>
+    </java>
+  </target>
+
+  <target name="x264" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="2g" output="x264-output.txt">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg line='--tosim-fifo ${env.VISER_TRACE}/x264-simdev'/>
+      <arg line='--sim-mode baseline'/>
+      <arg line='--stats-file "./x264-stats.py"'/>
+      <arg line='--cores 8'/>
+      <arg line='--use-l2 true'/>
+      <arg line='--xasserts true'/>
+      <arg line='--assert-period 10000000'/>
+      <arg line='--conflict-exceptions false'/>
+    </java>
+  </target>
+
+  <target name="help" depends="build">
+    <java classname="simulator.mesi.MESISim" fork="true" maxmemory="2g">
+      <classpath refid="mesisim.classpath"/>
+      <jvmarg value="-enableassertions"/>
+      <arg value="--help"/>
+    </java>
+  </target>
+
+</project>

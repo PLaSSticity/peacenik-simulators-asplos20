@@ -1,0 +1,30 @@
+
+# /
+/GPATH
+/GRTAGS
+/GTAGS
+/TAGS
+/.pydevproject
+
+# /src/
+/src/TAGS
+/src/GPATH
+/src/GRTAGS
+/src/GTAGS
+/src/.dir-locals.el
+
+# /src/option/
+/src/option/__pycache__
+
+# /src/parser/
+/src/parser/__pycache__
+
+# /src/result/
+/src/result/GPATH
+/src/result/GRTAGS
+/src/result/GTAGS
+/src/result/__pycache__
+
+# /src/task/
+/src/task/__pycache__
+/src/task/runtask_mod.py

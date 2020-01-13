@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ $# -ne 6 ]
+then
+  echo $#
+	echo "Usage $0 app_name workload cores trials conflict_index_start conflict_index_end"
+	echo "    (conflict_index_start <= conflict_index_end; see src/option/conflicts.py for indexes)"
+	exit 1
+fi
+
+CMD="viser-local --tools=pintool --tasks=clean,build --workload=test --bench=streamcluster --pinThreads=4 --output=viser-temp --trials=1 --assert=False --xassert=False --roiOnly=True --project=viser --cores=4 --siteTracking=True --verbose=0 --lockstep=False --pinTool=viserST"
+echo $CMD
+eval $CMD
+
+for i in $(seq $5 $6);
+do
+  CMD="viser-local --tools=pintool --tasks=run --workload=test --bench=$1 --pinThreads=$3 --output=viser-temp --trials=$4 --assert=False --xassert=False --roiOnly=True --project=viser --cores=$3 --siteTracking=True --verbose=3 --lockstep=False --pinTool=viserST --confIndex=$i"
+  echo $CMD
+  eval $CMD
+done

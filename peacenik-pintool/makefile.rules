@@ -1,0 +1,254 @@
+##############################################################
+#
+# This file includes all the test targets as well as all the
+# non-default build rules and test recipes.
+#
+##############################################################
+
+
+##############################################################
+#
+# Test targets
+#
+##############################################################
+
+###### Place all generic definitions here ######
+
+# This defines tests which run tools of the same name.  This is simply for convenience to avoid
+# defining the test name twice (once in TOOL_ROOTS and again in TEST_ROOTS).
+# Tests defined here should not be defined in TOOL_ROOTS and TEST_ROOTS.
+TEST_TOOL_ROOTS :=
+
+# This defines the tests to be run that were not already defined in TEST_TOOL_ROOTS.
+TEST_ROOTS :=
+
+# This defines a list of tests that should run in the "short" sanity. Tests in this list must also
+# appear either in the TEST_TOOL_ROOTS or the TEST_ROOTS list.
+# If the entire directory should be tested in sanity, assign TEST_TOOL_ROOTS and TEST_ROOTS to the
+# SANITY_SUBSET variable in the tests section below (see example in makefile.rules.tmpl).
+SANITY_SUBSET :=
+
+# This defines the tools which will be run during the the tests, and were not already defined in
+# TEST_TOOL_ROOTS.
+TOOL_ROOTS := visersim
+
+# This defines the static analysis tools which will be run during the the tests. They should not
+# be defined in TEST_TOOL_ROOTS. If a test with the same name exists, it should be defined in
+# TEST_ROOTS.
+# Note: Static analysis tools are in fact executables linked with the Pin Static Analysis Library.
+# This library provides a subset of the Pin APIs which allows the tool to perform static analysis
+# of an application or dll. Pin itself is not used when this tool runs.
+SA_TOOL_ROOTS :=
+
+# This defines all the applications that will be run during the tests.
+APP_ROOTS :=
+
+# This defines any additional object files that need to be compiled.
+OBJECT_ROOTS :=
+
+# This defines any additional dlls (shared objects), other than the pintools, that need to be compiled.
+DLL_ROOTS :=
+
+# This defines any static libraries (archives), that need to be built.
+LIB_ROOTS :=
+
+###### Place probe mode tests here ######
+ifeq ($(PROBE),1)
+    TEST_TOOL_ROOTS +=
+endif
+
+###### Place OS-specific definitions here ######
+
+# Linux
+ifeq ($(TARGET_OS),linux)
+    TEST_TOOL_ROOTS +=
+    TEST_ROOTS +=
+    SA_TOOL_ROOTS +=
+    APP_ROOTS +=
+endif
+
+# Mac OS X*
+ifeq ($(TARGET_OS),mac)
+    TEST_TOOL_ROOTS +=
+    TEST_ROOTS +=
+    SA_TOOL_ROOTS +=
+    APP_ROOTS +=
+endif
+
+# Windows
+ifeq ($(TARGET_OS),windows)
+    TEST_TOOL_ROOTS +=
+    APP_ROOTS +=
+endif
+
+###### Handle exceptions here ######
+
+##############################################################
+#
+# Test recipes
+#
+##############################################################
+
+# This section contains recipes for tests other than the default.
+# See makefile.default.rules for the default test rules.
+# All tests in this section should adhere to the naming convention: <testname>.test
+
+
+# This tool is tested in "Debugger/makefile". However, leave this line because it is referenced in the user manual.
+# The user may invoke make stack-debugger.test to build the tool and app shown in the manual.
+# There is an intentional "empty" line which contains a tab character so this "test" will have an empty recipe.
+
+
+
+##############################################################
+#
+# Build rules
+#
+##############################################################
+
+# This section contains the build rules for all binaries that have special build rules.
+# See makefile.default.rules for the default build rules.
+
+CXX_SRCS := $(wildcard *.cpp)
+CXX_OBJS := ${CXX_SRCS:.cpp=.o}
+
+CFLAGS +=
+CXXFLAGS += -pthread
+LDFLAGS +=
+TOOL_CXXFLAGS += -g -I$(PIN_ROOT)/lib/boost_1_58_0/
+
+# Build the intermediate object file.
+$(OBJDIR)inscount$(OBJ_SUFFIX): inscount.cpp
+	$(CXX) $(TOOL_CXXFLAGS) $(COMP_OBJ)$@ $<
+
+$(OBJDIR)viser$(OBJ_SUFFIX): viser.cpp viser.hpp event.hpp config.hpp analysis_callbacks.hpp
+	$(CXX) $(TOOL_CXXFLAGS) $(COMP_OBJ)$@ $<
+
+$(OBJDIR)analysis_callbacks$(OBJ_SUFFIX): analysis_callbacks.cpp analysis_callbacks.hpp event.hpp config.hpp
+	$(CXX) $(TOOL_CXXFLAGS) $(COMP_OBJ)$@ $<
+
+$(OBJDIR)instr_callbacks$(OBJ_SUFFIX): instr_callbacks.cpp viser.hpp analysis_callbacks.hpp config.hpp
+	$(CXX) $(TOOL_CXXFLAGS) $(COMP_OBJ)$@ $<
+
+# Build the tool as a dll (shared object).
+$(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX): $(OBJDIR)viser$(OBJ_SUFFIX) $(OBJDIR)analysis_callbacks$(OBJ_SUFFIX) $(OBJDIR)instr_callbacks$(OBJ_SUFFIX)
+	$(LINKER) $(TOOL_LDFLAGS_NOOPT) $(LINK_EXE)$@ $(^:%.h=) $(TOOL_LPATHS) $(TOOL_LIBS)
+
+
+###### Special applications' build rules ######
+
+FIFO_FRONTEND = fifo.frontend
+FIFO_MESI = fifo.mesi
+FIFO_VISER = fifo.viser
+
+MESISIM=java -enableassertions -classpath $(MESISIM_ROOT)/bin/:$(MESISIM_ROOT)/lib/guava-r08.jar:$(MESISIM_ROOT)/lib/jopt-simple-3.2.jar simulator.mesi.MESISim
+VISERSIM=java -enableassertions -Xmx2g -classpath $(VISERSIM_ROOT)/bin/:$(VISERSIM_ROOT)/lib/guava-r08.jar:$(VISERSIM_ROOT)/lib/jopt-simple-3.2.jar simulator.viser.ViserSim
+
+pipefork: pipefork.cpp
+	$(CXX) $(LDFLAGS) -o $@ $^
+
+namedpipe: namedpipe.cpp
+	$(CXX) $(TOOL_CXXFLAGS) $(LDFLAGS) -o $@ $^
+
+# Microbenchmarks
+
+#%.out : %.cpp Makefile
+#	$(CXX) -c $(CXXFLAGS) $(PIN_CXXFLAGS) -o $@ $<
+
+ls:  $(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX)
+	$(PIN_ROOT)/pin -t $(PINTOOL_ROOT)/$(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX) -sim-stats $(PWD)/ls-stats.output -- /bin/ls
+
+.PHONY : test1
+test1: $(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX)
+	$(CXX) $(CXXFLAGS) $(PIN_CXXFLAGS) -o microbenchmarks/test1.out microbenchmarks/test1.cpp
+	chmod a+x microbenchmarks/test1.out
+	$(PIN_ROOT)/pin -t $(PINTOOL_ROOT)/$(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX) -tosim-fifo $(PWD)/test1 -sim-stats $(PWD)/test1-stats.output -- $(PWD)/microbenchmarks/test1.out
+
+.PHONY : test1-fifo
+test1-fifo: $(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX)
+	$(CXX) $(CXXFLAGS) $(PIN_CXXFLAGS) -o microbenchmarks/test1.out microbenchmarks/test1.cpp
+	chmod a+x microbenchmarks/test1.out
+
+	test -p $(PWD)/$(FIFO_FRONTEND) || mkfifo $(PWD)/$(FIFO_FRONTEND)
+	test -p $(PWD)/$(FIFO_MESI) || mkfifo $(PWD)/$(FIFO_MESI)
+	test -p $(PWD)/$(FIFO_VISER) || mkfifo $(PWD)/$(FIFO_VISER)
+
+	$(PIN_ROOT)/pin -t $(PINTOOL_ROOT)/$(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX) -tosim-fifo $(PWD)/$(FIFO_FRONTEND) -sim-stats $(PWD)/test1-stats.output -- $(PWD)/microbenchmarks/test1.out &
+	$(PWD)/pipefork $(PWD)/$(FIFO_FRONTEND) $(PWD)/$(FIFO_MESI) $(PWD)/$(FIFO_VISER) &
+	$(MESISIM) --tosim-fifo $(PWD)/$(FIFO_MESI) --sim-mode baseline --stats-file $(PWD)/test1-stats-mesi.py --cores 8 --use-l2 --xassert false --assert-period 100 &
+	$(VISERSIM) --tosim-fifo $(PWD)/$(FIFO_VISER) --sim-mode viser --stats-file $(PWD)/test1-stats-viser.py --cores 8 --use-l2 --xassert false --assert-period 100 &
+
+pthread: $(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX)
+	$(CXX) $(CXXFLAGS) $(PIN_CXXFLAGS) -o microbenchmarks/pthread.out microbenchmarks/pthread.cpp
+	chmod a+x microbenchmarks/pthread.out
+	$(PIN_ROOT)/pin -t $(PINTOOL_ROOT)/$(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX) -sim-stats $(PWD)/pthread-stats.output -- $(PWD)/microbenchmarks/pthread.out
+
+pthread-rwlock: $(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX)
+	$(CXX) $(CXXFLAGS) $(PIN_CXXFLAGS) -o microbenchmarks/pthread-rwlock.out microbenchmarks/pthread-rwlock.cpp
+	chmod a+x microbenchmarks/pthread-rwlock.out
+	$(PIN_ROOT)/pin -t $(PINTOOL_ROOT)/$(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX) -sim-stats $(PWD)/pthread-rdlock-stats.output -- $(PWD)/microbenchmarks/pthread-rwlock.out
+
+# Parsec benchmarks
+
+BENCH=blackscholes
+# Do not use the override directive
+SIZE=simsmall
+
+.PHONY : bench
+bench: $(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX)
+	 rm -f $(PWD)/$(FIFO_FRONTEND); mkfifo $(PWD)/$(FIFO_FRONTEND)
+	 rm -f $(PWD)/$(FIFO_MESI); mkfifo $(PWD)/$(FIFO_MESI)
+	 rm -f $(PWD)/$(FIFO_VISER); mkfifo $(PWD)/$(FIFO_VISER)
+
+	$(PARSEC_ROOT)/bin/parsecmgmt -a run -p $(BENCH) -c gcc-pthreads-hooks -i $(SIZE) -n 8 -s "$(PIN_ROOT)/pin -t $(PINTOOL_ROOT)/$(OBJDIR)$(TOOL_ROOTS)$(PINTOOL_SUFFIX) -sim-stats $(PINTOOL_ROOT)/$(BENCH)-$(SIZE)-stats.output -tosim-fifo $(PWD)/$(FIFO_FRONTEND) --" &
+	$(PWD)/pipefork $(PWD)/$(FIFO_FRONTEND) $(PWD)/$(FIFO_MESI) $(PWD)/$(FIFO_VISER) &
+	$(MESISIM) --tosim-fifo $(PWD)/$(FIFO_MESI) --sim-mode baseline --stats-file $(PWD)/$(BENCH)-$(SIZE)-stats-mesi.py --cores 8 --use-l2 true --xassert false --assert-period 100 &
+	$(VISERSIM) --tosim-fifo $(PWD)/$(FIFO_VISER) --sim-mode viser --stats-file $(PWD)/$(BENCH)-$(SIZE)-stats-viser.py --cores 8 --use-l2 true --self-invalidate-private-lines true --xassert false --assert-period 100 &
+
+.PHONY : blackscholes
+blackscholes: override BENCH=blackscholes
+blackscholes: bench
+
+.PHONY : bodytrack
+bodytrack: override BENCH=bodytrack
+bodytrack: bench
+
+.PHONY : canneal
+canneal: override BENCH=canneal
+canneal: bench
+
+.PHONY : dedup
+dedup: override BENCH=dedup
+dedup: bench
+
+.PHONY : facesim
+facesim: override BENCH=facesim
+facesim: bench
+
+.PHONY : ferret
+ferret: override BENCH=ferret
+ferret: bench
+
+.PHONY : fluidanimate
+fluidanimate: override BENCH=fluidanimate
+fluidanimate: bench
+
+.PHONY : raytrace
+raytrace: override BENCH=raytrace
+raytrace: bench
+
+.PHONY : streamcluster
+streamcluster: override BENCH=streamcluster
+streamcluster: bench
+
+.PHONY : swaptions
+swaptions: override BENCH=swaptions
+swaptions: bench
+
+.PHONY : vips
+vips: override BENCH=vips
+vips: bench
+
+.PHONY : x264
+x264: override BENCH=x264
+x264: bench

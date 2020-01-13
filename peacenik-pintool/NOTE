@@ -1,0 +1,3 @@
+RZ: The pintool encountered segfault after GCE upgraded its VMs to 4.4.0-81-generic, so I had to roll back the kernel to 4.4.0-79-generic.
+
+RZ: The pintool works with 4.4.0-83-generic.

@@ -1,0 +1,14 @@
+# SB: Create a local copy of this file with appropriate values.
+
+# Use a list to pass multiple values if needed (e.g., emails).
+# Duplicate keys are not allowed in a section.
+
+[USER]
+USER = ["XXX"]
+
+[EMAIL]
+EMAIL = ["XXX@YYY.ZZZ"]
+
+[SYNC]
+SOURCE = ["AAA"]
+RESULT = ["AAA"]

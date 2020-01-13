@@ -1,0 +1,24 @@
+#!/bin/bash
+
+GCCVERSION=$(gcc -v 2>&1 | tail -1 | awk '{print $3}')
+if [ $GCCVERSION == "4.8.5" ]; then
+    echo "Is GCC version is 4.8.5? ... yes."
+else
+    echo "PARSEC 3.0 works best with GCC 4.8.x."
+    exit -1
+fi
+
+# Silently sync the Viser exp framework. The framework itself takes care of the benchmark, simulator directories.
+
+USERNAME=`whoami`
+SOURCE=`grep -rin "source" $VISER_EXP/config.ini | awk '{print $3}' | sed -r 's/^.{2}//' | sed -r 's/.{2}$//' `
+HOSTNAME=`hostname -A | tr -d ' '`
+
+USERNAME_AT_HOSTNAME=$USERNAME@$HOSTNAME
+USERNAME_AT_SOURCE=$USERNAME@$SOURCE
+
+if [ "$HOSTNAME" != "$SOURCE" -a "$USERNAME_AT_HOSTNAME" != "$USERNAME_AT_SOURCE" ]; then
+    rsync -r -L $USERNAME_AT_SOURCE:$HOME"/viser-exp/" $HOME"/viser-exp/"
+fi
+
+python3 $VISER_EXP/src/main.py --sameMachine=False $*
