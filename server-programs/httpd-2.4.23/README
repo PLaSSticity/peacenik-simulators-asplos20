@@ -1,0 +1,48 @@
+0. Install required packages
+-------------------------------------------------
+sudo apt install libpcre++-dev
+or
+sudo yum install pcre-devel
+
+1. Install apr and apr-util
+-------------------------------------------------
+cd <apr-src-dir>
+./configure --prefix=<apr-inst-dir>
+make && make install
+
+cd <apr-util-src-dir>
+./configure --prefix=<apr-inst-dir> --with-apr=<apr-inst-dir>
+make && make install
+
+
+2. Install httpd
+-------------------------------------------------
+cd <httpd-src-dir>
+vim server/mpm/worker/worker.c (mofify the file to add the __transaction_begin/end() mark functions; or directly copy the cotent of mod_files/worker.c in the repository)
+./configure --prefix=<httpd-inst-dir> --with-mpm=worker --with-apr-util=<apr-inst-dir> --with-apr=<apr-inst-dir>
+make && make install
+
+
+3. Post-install configuration
+-------------------------------------------------
+Open <httpd-inst-dir>/conf/httpd.conf
+
+Change "Listen 80" to "Listen 8080"
+
+Add the following lines to the conf file:
+
+<IfModule worker.c>
+ServerLimit          1
+StartServers         1
+MaxRequestWorkers    8
+MinSpareThreads      1
+MaxSpareThreads      8
+ThreadsPerChild      8
+<IfModule worker.c>
+
+Put the following line to the .bashrc file:
+export HTTPD_ROOT=<httpd-inst-dir>
+
+
+4. Install client scripts
+Put trigger-con*.sh into <httpd-inst-dir>
