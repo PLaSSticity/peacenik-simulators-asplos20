@@ -1,0 +1,68 @@
+This directory include scripts to reproduce data for all graphs in the paper, as well as a script to run a test workload and generate results. Each exp-figXX.sh script generates results corresponding to Figure XX in the paper. The test.sh script is for the test workload.
+
+All the scripts execute the viser-local command with multiple options to drive the simulation. For example, test.sh executes the following,
+
+"viser-local --tools=pintool,viseroptregularplru,pause,restartunopt,restartopt,mesiregularplru --tasks=clean,build,run,result --workload=test --bench=streamcluster --pinThreads=4 --output=DIR --trials=1 --assert=False --xassert=False --roiOnly=True --project=viser --cores=4 --siteTracking=True --verbose=0 --lockstep=True --pinTool=viserST"
+
+    "--tools" specifies the configurations to simulate. The configurations in the example and their corresponding names in the paper (Table 3) are as follows:
+        viseroptregularplru: ARC
+        pause: PNp
+        restartunopt: PNpr
+        restartopt: PN
+        mesiregularplru: WMM
+    
+        For each of the real experiments, the configuration name mappings between the script and the figure in the paper are as follows.
+        exp-fig3a.sh to Figure 3a
+            viseroptregularplru32: ARC 
+            pause32: PNp
+            restartunopt32: PNpr
+            restartopt32: PN
+        exp-fig3b.sh to Figure 3b
+            ce32: ARC 
+            cepause32: PNp
+            cerestartunopt32: PNpr
+            cerestartopt32: PN
+        exp-fig4a.sh to Figure 4a
+            viseroptregularplruCC: ARC-CC 
+            restartoptCC: PN-CC
+            mesiregularplruCC: WMM-CC
+        exp-fig4b.sh to Figure 4b
+            ceCC: CE-CC 
+            cerestartoptCC: PN-CC
+            mesiregularplruCC: WMM-CC
+        exp-fig5.sh to Figure 5
+            viseroptregularplru32: ARC 
+            viseroptregularplru32cpXX: ARC-cpXX
+            restartopt32: PN
+            (No configurations are needed for the ARC-noreboot bars in Figure 5 for the server programs. One just needs to hide/ignore the red components of the viseroptregularplru32/ARC bars to get ARC-noreboot bars.)
+
+    "--tasks" specifies the tasks to perform. Available tasks include: "clean" up old processes from prior simulations; "build" the Pin-based front end and the simulators; "run" the simulation; and generate results including data tables and graphs.
+
+    "--workload" is the workload size, either "test" or "simsmall". 
+
+    "--bench" lists the programs to run.
+
+    * "--pinThreads" and "--cores" specify number of simulated cores. Note that any simulation with > 4 cores requires a VM with >= 16 cores and >= 104GB memory.
+
+    ** "--output=DIR" specifies the output directory for the results. All raw data are in the ~/exp-output/DIR directory and the data tables and graphs are in the ~/exp-products/DIR directory. One should view the results at file:///home/asplos20/exp-products/DIR/index.html in a web browser. (See "Rsync results to another machine" below if the VM that runs the simulation does not have a GUI or web browser.)
+
+    "--verbose" specifies the verbose level. 
+
+    We do not recommend that users change other parameters.
+
+
+** Note that to run simulation with \bench{httpd} on any core count $num\_c$,
+one needs to edit <httpd-inst-dir>/conf/httpd.conf
+to make sure the values in the <IfModule worker.c> block are consistent with the core count as follows.
+
+<IfModule worker.c>
+ServerLimit          1
+StartServers         1
+MaxRequestWorkers    num_c
+MinSpareThreads      1
+MaxSpareThreads      num_c
+ThreadsPerChild      num_c
+<IfModule worker.c>
+
+    
+One can check the results in a web browser in the host machine.
