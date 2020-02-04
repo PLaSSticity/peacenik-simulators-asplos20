@@ -3,15 +3,20 @@ This repository provides source code of all the simulators evaluated in the ASPL
 Artifact VM image is available at <https://doi.org/10.5281/zenodo.3603351>. See [artifact_guide](./artifact_guide.pdf) for guidance of using the artifact to run the simulators and reproduce the graphs in the paper.
 
 ## Setup the environment on Ubuntu 16.04 LTS
+
 1. Clone code.
 
 ```Bash
 git clone https://github.com/PLaSSticity/peacenik-simulators-asplos20.git
 ```
 
-2. Download and install the PARSEC benchmarks. 
+2. Download and install the PARSEC benchmarks and server programs. 
 
-Our Peacenik evaluation executes benchmarks from the PARSEC suite version 3.0-beta-20150206. The PARSEC suite can be downloaded from http://parsec.cs.princeton.edu/.
+2.1 Our Peacenik evaluation executes benchmarks from the PARSEC suite version 3.0-beta-20150206. The PARSEC suite can be downloaded from http://parsec.cs.princeton.edu/.
+
+The evaluation uses a new build configuration `gcc-pthreads-hooks` to ensure that relevant PARSEC applications use Pthreads as the parallelization model. See the PARSEC section in our [ARC code repository](https://github.com/PLaSSticity/ce-arc-simulator-ipdps19/blob/master/README.md) for more instructions.
+
+2.2 The evaluation runs two server programs, [httpd-2.4.23](https://httpd.apache.org/) and [mysql-5.7.16](https://www.mysql.com/products/community/). You can download the source from [this repository](./server-programs) and use the instructions in their respective README files to build the two programs.
 
 3. Download and install Intel Pin.
 
@@ -62,6 +67,6 @@ export VISER_EXP=/path/to/peacenik-exp-framework        # the experiment framewo
 mkdir exp-output; mkdir exp-products
 ```
 
-## Run a test simulation
+## Run the Peacenik simulation and reproduce the graphs in the Peacenik paper
 
-## Reproduce the graphs in the Peacenik paper
+We provide scripts for you to run the Peacenik simulation and reproduce our results easily. You can follow the [instructions](./exp-scripts) to use the scripts.
