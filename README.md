@@ -1,6 +1,6 @@
-This repository provides source code of all the simulators evaluated in the ASPLOS 2020 paper "Peacenik: Architecture Support for Not Failing under Fail-Stop Memory Consistency", including the ARC and ARC+Peacenik, CE and CE+Peacenik, and WMM simulators; a Pin-based front end; a framework to drive experiments.
+This repository provides source code of all the simulators evaluated in our ASPLOS 2020 paper [*Peacenik: Architecture Support for Not Failing under Fail-Stop Memory Consistency*](http://web.cse.ohio-state.edu/~bond.213/peacenik-asplos-2020.pdf), including the ARC and ARC+Peacenik, CE and CE+Peacenik, and WMM simulators; a Pin-based front end; a framework to drive experiments.
 
-Artifact VM image is available at <https://doi.org/10.5281/zenodo.3603351>. See [artifact_guide](./artifact_guide.pdf) for guidance of using the artifact to run the simulators and reproduce the graphs in the paper.
+Artifact VM image is available at <https://doi.org/10.5281/zenodo.3603351>. See the artifact appendix in the [Peacenik paper](http://web.cse.ohio-state.edu/~bond.213/peacenik-asplos-2020.pdf) for guidance of using the artifact to run the simulators and reproduce the graphs in the paper.
 
 ## Setup the environment on Ubuntu 16.04 LTS
 
@@ -20,7 +20,7 @@ The evaluation uses a new build configuration `gcc-pthreads-hooks` to ensure tha
 
 3. Download and install Intel Pin.
 
-Our simulators feed on programs' event traces from a Pin-based frond end. The front end includes our [Pintool](./peacenik-pintool) and its underlying Intel Pin 2.14. Use the following instructions to install the Pintool:
+Our simulators feed on programs' event traces from a Pin-based frond end. The front end includes our [Pintool](./peacenik-pintool) and its underlying Intel Pin 2.14. The Pintool depends on the Boost library version > 1.58, which is expected to be in the `lib` directory under the Intel Pin root directory (i.e., `intel-pin/lib`). Use the following instructions to install the Pintool:
 
 ```Bash
 cd; wget https://software.intel.com/sites/landingpage/pintool/downloads/pin-2.14-71313-gcc.4.4.7-linux.tar.gz
