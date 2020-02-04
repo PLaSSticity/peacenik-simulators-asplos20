@@ -1,8 +1,11 @@
 0. Dependencies on Ubuntu 16.04
 sudo apt install cmake bison libncurses5-dev 
 
-1. Install
+1. Download and install
 -------------------------------------------------
+wget https://downloads.mysql.com/archives/get/p/23/file/mysql-5.7.16.tar.gz
+tar xvf mysql-5.7.16.tar.g
+# We assume the code is extracted to <mysql-src-dir>
 cd <mysql-src-dir>
 vim storage/innobase/sync/sync0arr.cc (modify the lock waiting timeout according to mod_files/sync0arr.cc)
 vim storage/innobase/include/ib0mutex.h ("noinline" the lock operations according to mod_files/ib0mutex.h)
