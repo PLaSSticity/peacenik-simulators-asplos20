@@ -1,0 +1,44 @@
+0. Dependencies on Ubuntu 16.04
+sudo apt install cmake bison libncurses5-dev 
+
+1. Download and install
+-------------------------------------------------
+wget https://downloads.mysql.com/archives/get/p/23/file/mysql-5.7.16.tar.gz
+tar xvf mysql-5.7.16.tar.g
+# We assume the code is extracted to <mysql-src-dir>
+cd <mysql-src-dir>
+vim storage/innobase/sync/sync0arr.cc (modify the lock waiting timeout according to mod_files/sync0arr.cc)
+vim storage/innobase/include/ib0mutex.h ("noinline" the lock operations according to mod_files/ib0mutex.h)
+mkdir build
+cd build/
+cmake -DDOWNLOAD_BOOST=1  -DWITH_BOOST=<mysql-src-dir> -DCMAKE_BUILD_TYPE= -DCMAKE_CXX_FLAGS="-O1 -g -fabi-version=2 -fno-omit-frame-pointer -fno-strict-aliasing -DDBUG_OFF" -DCMAKE_C_FLAGS="-O1 -g -fabi-version=2 -fno-omit-frame-pointer -fno-strict-aliasing -DDBUG_OFF" ..** install mysql into the default locaiton /usr/local/mysql to avoid a segfault during mysql server start.
+
+sudo make VERBOSE=1 && sudo make install
+
+2. Post-install configuration
+-------------------------------------------------
+# Edit the conf file as per my.cnf.template.
+sudo vim /etc/my.cnf
+
+cd /usr/local/mysql
+sudo mkdir mysql-files
+sudo chown username:username mysql-files
+chmod 750 mysql-files
+sudo bin/mysqld --initialize-insecure --user=username # create and initialize the data dir
+bin/mysql_ssl_rsa_setup
+
+3. Start the server
+-------------------------------------------------
+support-files/mysql.server start
+
+4. Start/test the client
+-------------------------------------------------
+bin/mysql -u root
+  > create database test;
+
+bin/mysql -u root -D test -e 'create table t1 (id int)'
+
+5. Copy the trigger scripts
+-------------------------------------------------
+sudo cp trigger* /usr/local/mysql/
+sudo chown username:username trigger*

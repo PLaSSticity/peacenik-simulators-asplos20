@@ -1,0 +1,30 @@
+[mysqld]
+datadir=/usr/local/mysql/data
+socket=/usr/local/mysql/data/mysql.sock
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+# Settings user and group are ignored when systemd is used.
+# If you need to run mysqld under a different user or group,
+# customize your systemd unit file for mariadb according to the
+# instructions in http://fedoraproject.org/wiki/Systemd
+pid-file=/usr/local/mysql/data/rui-4.pid
+log-error=/usr/local/mysql/data/rui-4.err
+general_log_file        = /usr/local/mysql/data/mysql.log
+general_log             = 1
+
+[mysql.server]
+pid-file=/usr/local/mysql/data/rui-4.pid
+log-error=/usr/local/mysql/data/rui-4-server.err
+general_log_file        = /usr/local/mysql/data/mysql.log
+general_log             = 1
+
+
+[mysqld_safe]
+log-error=/usr/local/mysql/data/rui-4-safe.err
+pid-file=/usr/local/mysql/data/rui-4.pid
+
+#
+# include all files from the config directory
+#
+!includedir /etc/my.cnf.d
+
